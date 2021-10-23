@@ -13,12 +13,12 @@
             "cwd": "${workspaceRoot}",
             "device": "STM32H743xx",
             "svdFile": "./STM32H743.svd",
-            "executable": "${workspaceFolder}/target/thumbv7em-none-eabihf/debug/blinky",
+            "preLaunchTask": "cargo build",
+            "executable": "${workspaceFolder}/target/thumbv7em-none-eabihf/debug/nucleo-h743zi",
             "configFiles": [
                 "./openocd.cfg"
             ],
             "runToMain": true,
-
         }
     ]
 }

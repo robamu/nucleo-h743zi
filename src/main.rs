@@ -9,7 +9,7 @@
 use panic_halt as _;
 
 use stm32h7xx_hal::{
-    prelude::*
+    prelude::*,
 };
 
 use cortex_m_rt::entry;
@@ -24,17 +24,13 @@ fn main() -> ! {
 
     // Take ownership over the raw flash and rcc devices and convert them into the corresponding
     // HAL structs
-    //let mut flash = dp.FLASH.constrain();
     let rcc = dp.RCC.constrain();
 
     let pwr = dp.PWR.constrain();
     let pwrcfg = pwr.freeze();
 
-    let rcc = rcc.sys_ck(400.mhz()).use_hse(8.mhz()).bypass_hse();
+    let rcc = rcc.use_hse(8.mhz()).bypass_hse();
     let ccdr = rcc.freeze(pwrcfg, &dp.SYSCFG);
-
-    let hse_ck = ccdr.clocks.hse_ck();
-    let hclk = ccdr.clocks.hclk();
 
     // Acquire the GPIOB peripheral
     let gpiob = dp.GPIOB.split(ccdr.peripheral.GPIOB);
@@ -46,15 +42,19 @@ fn main() -> ! {
     let mut ld3 = gpiob.pb14.into_push_pull_output();
     ld3.set_high().unwrap();
 
+    let one_second = ccdr.clocks.sys_ck().0;
+
     // Get the delay provider.
-    let mut delay = cp.SYST.delay(ccdr.clocks);
+    // TODO: Unfortunately, this somehow does not work..
+    // let mut delay = cp.SYST.delay(ccdr.clocks);
 
     // Wait for the timer to trigger an update and change the state of the LED
     loop {
         ld2.set_high().unwrap();
-        delay.delay_ms(2000_u16);
+        //delay.delay_ms(2000u16);
+        cortex_m::asm::delay(one_second);
         ld2.set_low().unwrap();
-        delay.delay_ms(2000_u16);
+        //delay.delay_ms(2000u16);
+        cortex_m::asm::delay(one_second);
     }
-
 }
