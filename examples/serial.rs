@@ -63,6 +63,8 @@ fn main() -> ! {
     let (mut tx, mut rx) = serial.split();
 
     loop {
+        let test_char = 's' as u8;   
+        tx.write(test_char);
         match rx.read() {
             Ok(c) => {
                 tx.write(c).unwrap();

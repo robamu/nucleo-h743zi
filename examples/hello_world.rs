@@ -1,22 +1,32 @@
-//! Blinks an LED
+//! Echo bytes over serial
 //!
-//! This assumes that LD2 (blue) is connected to pb7 and LD3 (red) is connected
-//! to pb14. This assumption is true for the nucleo-h743zi board.
+//! This assumes that serial TX is PD8 and RX is PD9. This is true for the
+//! nucleo-h743zi board in which these are connected to the ST-LINK virtual COM
+//! port. Furthermore, pb7 is used as LD2 and pb14 is used as LD3.
 
 #![no_std]
 #![no_main]
 
 use panic_halt as _;
 
-use nb::block;
-
 use stm32h7xx_hal::{
     prelude::*,
-    timer::Timer,
+    serial::{self, Serial, Error, Write},
 };
+
+use stm32h7xx_hal::prelude::Write;
+
 use cortex_m_rt::entry;
 
 use embedded_hal::digital::v2::OutputPin;
+
+fn print<S>(serial: S, message: &str)
+    where S: stm32h7xx_hal::serial::Write
+{ 
+    for c in message.as_bytes().iter() { 
+        block!(serial.write(*c)); 
+    } 
+} 
 
 #[entry]
 fn main() -> ! {
@@ -42,17 +52,25 @@ fn main() -> ! {
     // Configure gpio B pin 14 as a push-pull output.
     let mut ld3 = gpiob.pb14
         .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
-    ld3.set_high().unwrap();
 
-    // Configure the timer to trigger an update every second
-    let mut timer = Timer::tim1(dp.TIM1, 1.hz(), clocks, &mut rcc.apb2);
+    // Acquire the GPIOD peripheral
+    let mut gpiod = dp.GPIOD.split(&mut rcc.ahb4);
 
-    // Wait for the timer to trigger an update and change the state of the LED
+    // initialize serial
+    let tx = gpiod.pd8.into_af7(&mut gpiod.moder, &mut gpiod.afrh);
+    let rx = gpiod.pd9.into_af7(&mut gpiod.moder, &mut gpiod.afrh);
+
+    let mut serial = Serial::usart3(
+        dp.USART3,
+        (tx, rx),
+        115_200.bps(),
+        clocks,
+        &mut rcc.apb1,
+    );
+
+    // serial.listen(serial::Event::Rxne);
+    let (mut tx, mut rx) = serial.split();
     loop {
-        block!(timer.wait()).unwrap();
-        ld2.set_high().unwrap();
-        block!(timer.wait()).unwrap();
-        ld2.set_low().unwrap();
+        print(serial, "Hello World\n");
     }
-
 }
