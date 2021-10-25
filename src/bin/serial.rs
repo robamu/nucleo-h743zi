@@ -11,10 +11,10 @@ use panic_halt as _;
 
 use stm32h7xx_hal::{
     prelude::*,
-    serial::{self, Serial, Error},
-    block
+    serial::{self, Serial, Error}
 };
 use core::fmt::Write;
+use nb::block;
 
 use embedded_hal::digital::v2::OutputPin;
 use cortex_m_rt::entry;
@@ -24,15 +24,14 @@ fn main() -> ! {
     // Get access to the device specific peripherals from the peripheral access crate
     let dp = stm32h7xx_hal::stm32::Peripherals::take().unwrap();
 
-    // Take ownership over the raw flash and rcc devices and convert them into the corresponding
-    // HAL structs
+    // Take ownership over the RCC devices and convert them into the corresponding HAL structs
     let rcc = dp.RCC.constrain();
 
     let pwr = dp.PWR.constrain();
     let pwrcfg = pwr.freeze();
 
-    // Freeze the configuration of all the clocks in the system and store the frozen frequencies in
-    // `clocks`
+    // Freeze the configuration of all the clocks in the system and
+    // retrieve the Core Clock Distribution and Reset (CCDR) object
     let rcc = rcc.sys_ck(400.mhz()).use_hse(8.mhz()).bypass_hse();
     let ccdr = rcc.freeze(pwrcfg, &dp.SYSCFG);
 
