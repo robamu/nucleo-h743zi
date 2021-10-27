@@ -42,6 +42,30 @@ is provided.
 You can also perform debugging with a GUI using VS Code with the Cortex-Debug extension.
 Some configuration files were provided in the `.vscode` folder.
 
+## ITM Output
+
+The `itm` binary target shows a simple ITM usage example. In order to display the output
+sent form the MCU, install `itmdump` first
+
+```sh
+cargo install itmdump
+```
+
+Create an empty `itm.txt` in the crate root and then run the following command
+
+```sh
+itmdump -F -f itm.txt
+```
+
+Assuming you have selected an appropriate runner like specified in the Debugging chapter,
+you can run
+
+```sh
+cargo run --bin itm
+```
+
+and you should receive some output into the ITM file.
+
 ## License
 
 [0-clause BSD license](LICENSE-0BSD.txt).
