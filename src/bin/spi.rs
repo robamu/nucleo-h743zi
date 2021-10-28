@@ -1,3 +1,10 @@
+//! SPI example application
+//!
+//! Connect a SPI device or a logic analyzer to the pins
+//!  - D13: SPI_A_SCK
+//!  - D12: SPI_A_MISO
+//!  - D11: SPI_A_MOSI
+//! The received bytes will be printed to the serial port via the ST-Link
 #![no_main]
 #![no_std]
 
