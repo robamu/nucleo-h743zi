@@ -95,19 +95,20 @@ pub mod serial {
 
     pub struct SerLogger {
         level: Level,
-        serial: Mutex<RefCell<Option<serial::Serial<device::USART3>>>>
     }
+
+    static LOG_UART: Mutex<RefCell<Option<serial::Serial<device::USART3>>>> =
+            Mutex::new(RefCell::new(None));
 
     static SER_LOGGER: SerLogger = SerLogger {
         level: Level::Info,
-        serial: Mutex::new(RefCell::new(None))
     };
 
     pub fn init(
         serial: serial::Serial<device::USART3>
     ) {
         interrupt::free(|cs| {
-            SER_LOGGER.serial.borrow(cs).replace(Some(serial));
+            LOG_UART.borrow(cs).replace(Some(serial));
         });
         log::set_logger(&SER_LOGGER).map(|()| log::set_max_level(LevelFilter::Info)).unwrap();
     }
@@ -119,7 +120,7 @@ pub mod serial {
 
         fn log(&self, record: &Record) {
             interrupt::free(|cs| {
-                let mut tx_ref = self.serial.borrow(cs).borrow_mut();
+                let mut tx_ref = LOG_UART.borrow(cs).borrow_mut();
                 let tx = tx_ref.as_mut().unwrap();
                 writeln!(tx, "{} - {}\r", record.level(), record.args()).unwrap();
             })
