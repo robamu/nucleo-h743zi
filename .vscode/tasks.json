@@ -30,6 +30,20 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "cargo build itm",
+            "type": "shell",
+            "command": "~/.cargo/bin/cargo", // note: full path to the cargo
+            "args": [
+                "build",
+                "--bin",
+                "itm",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
