@@ -25,7 +25,7 @@ fn main() -> ! {
     // Freeze the configuration of all the clocks in the system and
     // retrieve the Core Clock Distribution and Reset (CCDR) object
     // Configure PLL1 R for TRACEC as well
-    let rcc = rcc.sys_ck(400.mhz()).use_hse(8.mhz()).bypass_hse().pll1_r_ck(400.mhz());;
+    let rcc = rcc.sys_ck(400.mhz()).use_hse(8.mhz()).bypass_hse().pll1_r_ck(400.mhz());
     let ccdr = rcc.freeze(pwrcfg, &dp.SYSCFG);
 
     let stim = &mut cp.ITM.stim[0];
