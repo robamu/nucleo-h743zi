@@ -17,6 +17,10 @@ panic-halt = "0.2"
 nb = "1.0.0"
 stm32h7xx-hal = { version="0.10.0", features=["stm32h743v"] }
 
+[features]
+default = ["enable-itm"]
+enable-itm = []
+
 [profile.dev]
 debug = true
 

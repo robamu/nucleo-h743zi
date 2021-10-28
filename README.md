@@ -44,6 +44,11 @@ Some configuration files were provided in the `.vscode` folder.
 
 ## ITM Output
 
+Using the ITM requires some configuration of the SWO, SWTF, ITM and DBGMCU registers.
+By default, this will be done inside the application, but you can also opt out and perform this
+step externally (for example with a `*.gdb` file) by passing `--no-default-features` to the build
+command.
+
 The `itm` binary target shows a simple ITM usage example. In order to display the output
 sent form the MCU, install `itmdump` first
 
