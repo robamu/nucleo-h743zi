@@ -1,2 +1,0 @@
-//! Utilities
-pub mod logger;
