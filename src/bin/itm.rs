@@ -8,6 +8,9 @@ use cortex_m_rt::entry;
 use cortex_m::iprintln;
 use panic_halt as _;
 
+mod utilities;
+use log::{info, warn};
+
 use stm32h7xx_hal::{block, prelude::*, timer};
 
 #[cfg(feature="enable-itm")]
@@ -15,6 +18,9 @@ use stm32h7xx_hal::{rcc, stm32};
 
 #[cfg(feature="enable-itm")]
 /// Enables ITM
+///
+/// Will be done by default, but doing this is also possible with a dedicated
+/// `*.gdb` file
 unsafe fn enable_itm(
     dbgmcu: &stm32::DBGMCU,
     dcb: &mut cortex_m::peripheral::DCB,
@@ -94,11 +100,15 @@ fn main() -> ! {
     let mut timer = timer::Timer::tim1(dp.TIM1, ccdr.peripheral.TIM1, &ccdr.clocks);
     timer.start(1.hz());
 
+    // Set up a more complex logger
+    utilities::logger::init_itm_log();
     iprintln!(stim, "Hello World");
     let mut counter = 0;
 
     loop {
         iprintln!(stim, "{}: This is a very useful logger", counter);
+        info!("This is a more complex logger using the log framework");
+        warn!("Warnings are also possible.");
         counter += 1;
         // Echo what is received on the serial link.
         block!(timer.wait()).unwrap();
