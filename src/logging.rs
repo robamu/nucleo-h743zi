@@ -88,43 +88,78 @@ pub mod itm {
 
 pub mod serial {
     use log::{Level, Metadata, Record, LevelFilter};
+    use lazy_static::lazy_static;
     use cortex_m::interrupt::{self, Mutex};
-    use core::{cell::RefCell};
+    use cortex_m_log::printer::GenericPrinter;
+    use cortex_m_log::log::Logger;
+    use cortex_m_log::printer::Dummy;
+    use core::{borrow::Borrow, cell::RefCell};
     use stm32h7xx_hal::{serial, device};
     use core::fmt::Write;
 
-    pub struct SerLogger {
-        level: Level,
-        serial: Mutex<RefCell<Option<serial::Serial<device::USART3>>>>
-    }
+    static SERIAL_REF: Mutex<RefCell<Option<serial::Serial<device::USART3>>>> = Mutex::new(
+        RefCell::new(None)
+    );
 
-    static SER_LOGGER: SerLogger = SerLogger {
-        level: Level::Info,
-        serial: Mutex::new(RefCell::new(None))
+    // lazy_static! {
+    //     static ref SER_LOGGER: Logger<GenericPrinter<serial::Serial<device::USART3>>> = Logger {
+    //         level: LevelFilter::Info,
+    //         inner: unsafe {
+    //             interrupt::free(|cs| {
+    //                 let serial_ref = SERIAL_REF.borrow(cs).borrow_mut();
+    //                 let serial = serial_ref.as_mut().unwrap();
+    //                 GenericPrinter::new(serial)
+    //         })
+    //         },
+    //     };
+    // }
+
+    static SER_LOGGER: Logger<GenericPrinter<serial::Serial<device::USART3>>> = Logger {
+        level: LevelFilter::Info,
+        inner: unsafe {
+            interrupt::free(|cs| {
+                let serial_ref = SERIAL_REF.borrow(cs).borrow_mut();
+                let serial = serial_ref.as_mut().unwrap();
+                GenericPrinter::new(serial)
+        })
+        },
     };
+    //unsafe impl Sync for GenericPrinter<serial::Serial<device::USART3>> {};
+
+    // static SER_LOGGER: Logger<GenericPrinter<serial::Serial<device::USART3>>> = Logger {
+    //     level: LevelFilter::Info,
+    //     inner: {}
+    // };
+
+    // lazy_static! {
+    //     static ref SER_LOGGER: Logger<Dummy> = Logger {
+    //         inner: Dummy::new(),
+    //         level: LevelFilter::Info,
+    //     };
+    // }
 
     pub fn init(
         serial: serial::Serial<device::USART3>
     ) {
-        interrupt::free(|cs| {
-            SER_LOGGER.serial.borrow(cs).replace(Some(serial));
-        });
-        log::set_logger(&SER_LOGGER).map(|()| log::set_max_level(LevelFilter::Info)).unwrap();
+        // interrupt::free(|cs| {
+        //     SER_LOGGER.inner.borrow(cs).replace(Some(serial));
+        // });
+        // log::set_logger(&SER_LOGGER).map(|()| log::set_max_level(LevelFilter::Info)).unwrap();
     }
 
-    impl log::Log for SerLogger {
-        fn enabled(&self, metadata: &Metadata) -> bool {
-            metadata.level() <= self.level
-        }
+    // impl log::Log for SerLogger {
+    //     fn enabled(&self, metadata: &Metadata) -> bool {
+    //         metadata.level() <= self.level
+    //     }
 
-        fn log(&self, record: &Record) {
-            interrupt::free(|cs| {
-                let mut tx_ref = self.serial.borrow(cs).borrow_mut();
-                let tx = tx_ref.as_mut().unwrap();
-                writeln!(tx, "{} - {}\r", record.level(), record.args()).unwrap();
-            })
-        }
+    //     fn log(&self, record: &Record) {
+    //         interrupt::free(|cs| {
+    //             let mut tx_ref = self.serial.borrow(cs).borrow_mut();
+    //             let tx = tx_ref.as_mut().unwrap();
+    //             writeln!(tx, "{} - {}\r", record.level(), record.args()).unwrap();
+    //         })
+    //     }
 
-        fn flush(&self) {}
-    }
+    //     fn flush(&self) {}
+    // }
 }

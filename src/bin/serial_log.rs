@@ -6,6 +6,7 @@ use panic_halt as _;
 use nucleo_h743zi::logging;
 use log::{info, warn};
 use stm32h7xx_hal::{block, serial, prelude::*, timer};
+use cortex_m_log::{printer, printer::Printer};
 
 use cortex_m_rt::entry;
 
@@ -43,8 +44,11 @@ fn main() -> ! {
     let mut timer = timer::Timer::tim1(dp.TIM1, ccdr.peripheral.TIM1, &ccdr.clocks);
     timer.start(1.hz());
 
+    let mut ser_printer = printer::generic::GenericPrinter::new(serial);
+    ser_printer.println(format_args!("Hello World\r"));
+
     // Configure the serial port as a logger
-    logging::serial::init(serial);
+    //logging::serial::init(serial);
     info!("Serial logger example application");
     loop {
         info!("Hello, I'm a periodic printout");
