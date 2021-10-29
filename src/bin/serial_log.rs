@@ -4,11 +4,15 @@
 use panic_halt as _;
 
 use nucleo_h743zi::logging;
-use log::{info, warn};
-use stm32h7xx_hal::{block, serial, prelude::*, timer};
+use log::{info, warn, LevelFilter};
+use stm32h7xx_hal::{block, serial, prelude::*, timer, device};
 use cortex_m_log::{printer, printer::Printer};
+use cortex_m::interrupt::{self, Mutex};
+use core::{borrow::Borrow, cell::RefCell};
 
 use cortex_m_rt::entry;
+
+static SERIAL_REF: Mutex<RefCell<Option<serial::Serial<device::USART3>>>> = Mutex::new(RefCell::new(None));
 
 #[entry]
 fn main() -> ! {
@@ -44,9 +48,16 @@ fn main() -> ! {
     let mut timer = timer::Timer::tim1(dp.TIM1, ccdr.peripheral.TIM1, &ccdr.clocks);
     timer.start(1.hz());
 
-    let mut ser_printer = printer::generic::GenericPrinter::new(serial);
-    ser_printer.println(format_args!("Hello World\r"));
+    let ser_printer = printer::generic::GenericPrinter::new(serial);
 
+    let cortex_logger = cortex_m_log::log::Logger {
+        level: LevelFilter::Info,
+        inner: ser_printer
+    };
+
+    unsafe { 
+        cortex_m_log::log::trick_init(&cortex_logger).unwrap();
+    }
     // Configure the serial port as a logger
     //logging::serial::init(serial);
     info!("Serial logger example application");

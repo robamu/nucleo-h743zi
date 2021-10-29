@@ -97,9 +97,9 @@ pub mod serial {
     use stm32h7xx_hal::{serial, device};
     use core::fmt::Write;
 
-    static SERIAL_REF: Mutex<RefCell<Option<serial::Serial<device::USART3>>>> = Mutex::new(
-        RefCell::new(None)
-    );
+    // static SERIAL_REF: Mutex<RefCell<Option<serial::Serial<device::USART3>>>> = Mutex::new(
+    //     RefCell::new(None)
+    // );
 
     // lazy_static! {
     //     static ref SER_LOGGER: Logger<GenericPrinter<serial::Serial<device::USART3>>> = Logger {
@@ -114,16 +114,16 @@ pub mod serial {
     //     };
     // }
 
-    static SER_LOGGER: Logger<GenericPrinter<serial::Serial<device::USART3>>> = Logger {
-        level: LevelFilter::Info,
-        inner: unsafe {
-            interrupt::free(|cs| {
-                let serial_ref = SERIAL_REF.borrow(cs).borrow_mut();
-                let serial = serial_ref.as_mut().unwrap();
-                GenericPrinter::new(serial)
-        })
-        },
-    };
+    // static SER_LOGGER: Logger<GenericPrinter<serial::Serial<device::USART3>>> = Logger {
+    //     level: LevelFilter::Info,
+    //     inner: unsafe {
+    //         interrupt::free(|cs| {
+    //             let serial_ref = SERIAL_REF.borrow(cs).borrow_mut();
+    //             let serial = serial_ref.as_mut().unwrap();
+    //             GenericPrinter::new(serial)
+    //     })
+    //     },
+    // };
     //unsafe impl Sync for GenericPrinter<serial::Serial<device::USART3>> {};
 
     // static SER_LOGGER: Logger<GenericPrinter<serial::Serial<device::USART3>>> = Logger {
@@ -138,14 +138,14 @@ pub mod serial {
     //     };
     // }
 
-    pub fn init(
-        serial: serial::Serial<device::USART3>
-    ) {
+    // pub fn init(
+    //     serial: serial::Serial<device::USART3>
+    // ) {
         // interrupt::free(|cs| {
         //     SER_LOGGER.inner.borrow(cs).replace(Some(serial));
         // });
         // log::set_logger(&SER_LOGGER).map(|()| log::set_max_level(LevelFilter::Info)).unwrap();
-    }
+    // }
 
     // impl log::Log for SerLogger {
     //     fn enabled(&self, metadata: &Metadata) -> bool {
