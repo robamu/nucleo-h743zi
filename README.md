@@ -1,3 +1,5 @@
+[![build](https://github.com/robamu/nucleo-h743zi/actions/workflows/cargo.yml/badge.svg)](https://github.com/robamu/nucleo-h743zi/actions/workflows/cargo.yml)
+
 # nucleo-h743zi
 
 Examples programs for nucleo-h743zi board.
